@@ -61,6 +61,8 @@ public class FirebasePlugin extends CordovaPlugin {
     private static CordovaWebView appView;
     private final String TAG = "FirebasePlugin";
     protected static final String KEY = "badge";
+    public static String FCM_PROJECT_SENDER_ID = null;
+    public static final String FCM_SERVER_CONNECTION = "@gcm.googleapis.com";
 
     private static boolean inBackground = true;
     private static ArrayList<Bundle> notificationStack = null;
@@ -73,7 +75,7 @@ public class FirebasePlugin extends CordovaPlugin {
         final Bundle extras = this.cordova.getActivity().getIntent().getExtras();
         this.cordova.getThreadPool().execute(new Runnable() {
             public void run() {
-                Log.d(TAG, "Starting Firebase plugin");
+                Log.d(TAG, "Starting Firebase pluginn");
                 FirebaseApp.initializeApp(context);
                 mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
                 mFirebaseAnalytics.setAnalyticsCollectionEnabled(true);
@@ -200,6 +202,9 @@ public class FirebasePlugin extends CordovaPlugin {
             return true;
         } else if (action.equals("clearAllNotifications")) {
             this.clearAllNotifications(callbackContext);
+            return true;
+        } else if (action.equals("setSenderId")) {
+            this.setSenderId(callbackContext, args.getString(0));
             return true;
         }
 
@@ -434,6 +439,21 @@ public class FirebasePlugin extends CordovaPlugin {
                 try {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
                     callbackContext.success();
+                } catch (Exception e) {
+                    Crashlytics.logException(e);
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void setSenderId(final CallbackContext callbackContext, final String id) {
+        FCM_PROJECT_SENDER_ID = id;
+        Log.d(TAG, "setting sender ID...")
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    if (id) callbackContext.success();
                 } catch (Exception e) {
                     Crashlytics.logException(e);
                     callbackContext.error(e.getMessage());
@@ -747,7 +767,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             try {
                                 String verificationId = null;
                                 String code = null;
-								
+
                                 Field[] fields = credential.getClass().getDeclaredFields();
                                 for (Field field : fields) {
                                     Class type = field.getType();
@@ -814,7 +834,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             callbackContext.sendPluginResult(pluginresult);
                         }
                     };
-	
+
                     PhoneAuthProvider.getInstance().verifyPhoneNumber(number, // Phone number to verify
                             timeOutDuration, // Timeout duration
                             TimeUnit.SECONDS, // Unit of timeout
@@ -827,7 +847,7 @@ public class FirebasePlugin extends CordovaPlugin {
             }
         });
     }
-	
+
     private static String getPrivateField(PhoneAuthCredential credential, Field field) {
         try {
             field.setAccessible(true);

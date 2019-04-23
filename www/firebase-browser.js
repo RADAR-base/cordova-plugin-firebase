@@ -157,3 +157,9 @@ exports.clearAllNotifications = function (success, error) {
     success();
   }
 };
+
+exports.setSenderId = function (id, success, error) {
+    if (typeof success === 'function') {
+      success();
+    }
+  };
