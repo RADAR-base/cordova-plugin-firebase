@@ -29,6 +29,9 @@
 static NSInteger const kNotificationStackSize = 10;
 static FirebasePlugin *firebasePlugin;
 
+static NSString *FCM_SERVER_CONNECTION = @"@gcm.googleapis.com";
+static NSString *FCM_PROJECT_SENDER_ID;
+
 + (FirebasePlugin *) firebasePlugin {
     return firebasePlugin;
 }
@@ -62,6 +65,18 @@ static FirebasePlugin *firebasePlugin;
 
 - (void)getToken:(CDVInvokedUrlCommand *)command {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[FIRInstanceID instanceID] token]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) setSenderId:(CDVInvokedUrlCommand *)command
+{
+    NSString* id = [command.arguments objectAtIndex:0];
+    FCM_PROJECT_SENDER_ID = id;
+
+    NSLog(@"Sender ID set!");
+
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
