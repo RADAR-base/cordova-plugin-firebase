@@ -448,12 +448,12 @@ public class FirebasePlugin extends CordovaPlugin {
     }
 
     public void setSenderId(final CallbackContext callbackContext, final String id) {
+        Log.d(TAG, "Setting sender ID ...");
         FCM_PROJECT_SENDER_ID = id;
-        Log.d(TAG, "setting sender ID...")
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 try {
-                    if (id) callbackContext.success();
+                    if (FCM_PROJECT_SENDER_ID != null) callbackContext.success();
                 } catch (Exception e) {
                     Crashlytics.logException(e);
                     callbackContext.error(e.getMessage());

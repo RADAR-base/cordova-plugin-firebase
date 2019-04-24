@@ -169,5 +169,11 @@ exports.clearAllNotifications = function (success, error) {
 };
 
 exports.setSenderId = function (id, success, error) {
-    exec(success, error, "FirebasePlugin", "setSenderId", [id]);
-  };
+  exec(success, error, "FirebasePlugin", "setSenderId", [id]);
+
+};
+
+exports.upstream = function(data, success, error) {
+  exec(success, error, 'FirebasePlugin', 'upstream', [data]);
+};
+
