@@ -163,3 +163,9 @@ exports.setSenderId = function (id, success, error) {
       success();
   }
 };
+
+exports.upstream = function (data, success, error) {
+    if (typeof success === 'function') {
+      success();
+  }
+};

@@ -206,6 +206,9 @@ public class FirebasePlugin extends CordovaPlugin {
         } else if (action.equals("setSenderId")) {
             this.setSenderId(callbackContext, args.getString(0));
             return true;
+        } else if (action.equals("upstream")) {
+            this.upstream(callbackContext, args.getJSONObject(0));
+            return true;
         }
 
         return false;
@@ -447,6 +450,7 @@ public class FirebasePlugin extends CordovaPlugin {
         });
     }
 
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
     public void setSenderId(final CallbackContext callbackContext, final String id) {
         Log.d(TAG, "Setting sender ID ...");
         FCM_PROJECT_SENDER_ID = id;
@@ -460,6 +464,40 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             }
         });
+    }
+
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
+    private void upstream(final CallbackContext callbackContext, final JSONObject data) {
+ 		if(FCM_PROJECT_SENDER_ID == null) {
+			callbackContext.error("FCM Sender Id is null, please set it first using setSenderId()");
+		}
+		Log.d(TAG, "Sending upstream message ...");
+		cordova.getThreadPool().execute(new Runnable() {
+			public void run() {
+				try{
+					HashMap<String, String> map = new HashMap<String, String>();
+					Iterator<?> keys = data.keys();
+
+					while( keys.hasNext() ){
+						String key = (String)keys.next();
+						String value = data.getString(key);
+						map.put(key, value);
+
+						Log.d(TAG, "Key : " + key + ", Value : " + value);
+					}
+
+					FirebaseMessaging fm = FirebaseMessaging.getInstance();
+					fm.send(new RemoteMessage.Builder(FCM_PROJECT_SENDER_ID + FCM_SERVER_CONNECTION)
+							.setMessageId(map.get("eventId"))
+							.setData(map)
+							.setTtl(900)
+							.build());
+					callbackContext.success("Successfully Sent");
+				}catch(Exception e){
+					callbackContext.error(e.getMessage());
+				}
+			}
+		});
     }
 
     private void unregister(final CallbackContext callbackContext) {

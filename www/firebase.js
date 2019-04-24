@@ -176,4 +176,3 @@ exports.setSenderId = function (id, success, error) {
 exports.upstream = function(data, success, error) {
   exec(success, error, 'FirebasePlugin', 'upstream', [data]);
 };
-
