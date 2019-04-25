@@ -31,7 +31,6 @@ static FirebasePlugin *firebasePlugin;
 
 static NSString *FCM_SERVER_CONNECTION = @"@gcm.googleapis.com";
 static NSString *FCM_PROJECT_SENDER_ID;
-static long long ttl = 900;
 
 + (FirebasePlugin *) firebasePlugin {
     return firebasePlugin;
@@ -81,18 +80,25 @@ static long long ttl = 900;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) upstream:(CDVInvokedUrlCommand *)command
+-(void) upstream:(CDVInvokedUrlCommand *)command
 {
-    NSString* receiver = [NSString stringWithFormat:@"%@%@", FCM_PROJECT_SENDER_ID, FCM_SERVER_CONNECTION];
-    NSDictionary* text = [command.arguments objectAtIndex:0];
-    NSString* messageId = text[@"eventId"];
-
-    NSLog(@"Notif: %@", text);
-    NSLog(@"Sending...");
-
-    [[FIRMessaging messaging] sendMessage:text to:receiver withMessageID:messageId timeToLive:ttl];
     CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    if(FCM_PROJECT_SENDER_ID == nil || [FCM_PROJECT_SENDER_ID length] == 0){
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                   messageAsString:[NSString stringWithFormat:
+                                                    @"FCM Sender Id is null, please set it first using setSenderId()"]];
+    }
+    else {
+        NSString* receiver = [NSString stringWithFormat:@"%@%@", FCM_PROJECT_SENDER_ID, FCM_SERVER_CONNECTION];
+        NSDictionary* text = [command.arguments objectAtIndex:0];
+        NSString* messageId = text[@"eventId"];
+
+        NSLog(@"Notif: %@", text);
+        NSLog(@"Sending...");
+
+        [[FIRMessaging messaging] sendMessage:text to:receiver withMessageID:messageId timeToLive:900];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

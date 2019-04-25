@@ -221,7 +221,7 @@
 
 - (void)sendDataMessageFailure:(NSNotification *)notification
 {
-    NSLog(@"Send fail");
+    NSLog(@"Send error: %@", notification);
 }
 
 - (void)sendDataMessageSuccess:(NSNotification *)notification
