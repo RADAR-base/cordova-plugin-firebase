@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/arnesson/cordova-plugin-firebase.svg?branch=master)](https://travis-ci.org/arnesson/cordova-plugin-firebase)
 
-# cordova-plugin-firebase
+# cordova-plugin-firebase-with-upstream-messaging
+This plugin is a modified version of cordova-plugin-firebase that provides the ability to set the FCM sender ID and send upstream messages.
+
 This plugin brings push notifications, analytics, event tracking, crash reporting and more from Google Firebase to your Cordova project!  Android and iOS supported.
 
 ## Supported Cordova Versions
