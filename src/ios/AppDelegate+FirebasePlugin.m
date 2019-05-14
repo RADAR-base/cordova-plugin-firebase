@@ -49,17 +49,17 @@
 
     // get GoogleService-Info.plist file path
     NSString *filePath = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
-    
+
     // if file is successfully found, use it
     if(filePath){
         NSLog(@"GoogleService-Info.plist found, setup: [FIRApp configureWithOptions]");
         // create firebase configure options passing .plist as content
         FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:filePath];
-        
+
         // configure FIRApp with options
         [FIRApp configureWithOptions:options];
     }
-    
+
     // no .plist found, try default App
     if (![FIRApp defaultApp] && !filePath) {
         NSLog(@"GoogleService-Info.plist NOT FOUND, setup: [FIRApp defaultApp]");
@@ -76,6 +76,12 @@
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)
                                                  name:kFIRInstanceIDTokenRefreshNotification object:nil];
+
+    // Add observer for upstream messages callback.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendDataMessageSuccess:)
+                                                 name:FIRMessagingSendSuccessNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendDataMessageFailure:)
+                                                 name:FIRMessagingSendErrorNotification object:nil];
 
     self.applicationInBackground = @(YES);
 
@@ -212,6 +218,17 @@
     // Print full message
     NSLog(@"%@", [remoteMessage appData]);
 }
+
+- (void)sendDataMessageFailure:(NSNotification *)notification
+{
+    NSLog(@"Send error: %@", notification);
+}
+
+- (void)sendDataMessageSuccess:(NSNotification *)notification
+{
+    NSLog(@"Send success: %@", notification);
+}
+
 #endif
 
 @end

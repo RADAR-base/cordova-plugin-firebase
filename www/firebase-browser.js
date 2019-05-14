@@ -157,3 +157,15 @@ exports.clearAllNotifications = function (success, error) {
     success();
   }
 };
+
+exports.setSenderId = function (id, success, error) {
+    if (typeof success === 'function') {
+      success();
+  }
+};
+
+exports.upstream = function (data, success, error) {
+    if (typeof success === 'function') {
+      success();
+  }
+};

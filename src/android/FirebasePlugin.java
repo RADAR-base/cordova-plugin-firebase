@@ -20,6 +20,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigInfo;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -61,6 +62,8 @@ public class FirebasePlugin extends CordovaPlugin {
     private static CordovaWebView appView;
     private final String TAG = "FirebasePlugin";
     protected static final String KEY = "badge";
+    public static String FCM_PROJECT_SENDER_ID = null;
+    public static final String FCM_SERVER_CONNECTION = "@gcm.googleapis.com";
 
     private static boolean inBackground = true;
     private static ArrayList<Bundle> notificationStack = null;
@@ -200,6 +203,12 @@ public class FirebasePlugin extends CordovaPlugin {
             return true;
         } else if (action.equals("clearAllNotifications")) {
             this.clearAllNotifications(callbackContext);
+            return true;
+        } else if (action.equals("setSenderId")) {
+            this.setSenderId(callbackContext, args.getString(0));
+            return true;
+        } else if (action.equals("upstream")) {
+            this.upstream(callbackContext, args.getJSONObject(0));
             return true;
         }
 
@@ -440,6 +449,56 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             }
         });
+    }
+
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
+    public void setSenderId(final CallbackContext callbackContext, final String id) {
+        Log.d(TAG, "Setting sender ID ...");
+        FCM_PROJECT_SENDER_ID = id;
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    if (FCM_PROJECT_SENDER_ID != null) callbackContext.success();
+                } catch (Exception e) {
+                    Crashlytics.logException(e);
+                    callbackContext.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
+    private void upstream(final CallbackContext callbackContext, final JSONObject data) {
+ 		if(FCM_PROJECT_SENDER_ID == null) {
+			callbackContext.error("FCM Sender Id is null, please set it first using setSenderId()");
+		}
+		Log.d(TAG, "Sending upstream message ...");
+		cordova.getThreadPool().execute(new Runnable() {
+			public void run() {
+				try{
+					HashMap<String, String> map = new HashMap<String, String>();
+					Iterator<?> keys = data.keys();
+
+					while( keys.hasNext() ){
+						String key = (String)keys.next();
+						String value = data.getString(key);
+						map.put(key, value);
+
+						Log.d(TAG, "Key : " + key + ", Value : " + value);
+					}
+
+					FirebaseMessaging fm = FirebaseMessaging.getInstance();
+					fm.send(new RemoteMessage.Builder(FCM_PROJECT_SENDER_ID + FCM_SERVER_CONNECTION)
+							.setMessageId(map.get("eventId"))
+							.setData(map)
+							.setTtl(900)
+							.build());
+					callbackContext.success("Successfully Sent");
+				}catch(Exception e){
+					callbackContext.error(e.getMessage());
+				}
+			}
+		});
     }
 
     private void unregister(final CallbackContext callbackContext) {
@@ -747,7 +806,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             try {
                                 String verificationId = null;
                                 String code = null;
-								
+
                                 Field[] fields = credential.getClass().getDeclaredFields();
                                 for (Field field : fields) {
                                     Class type = field.getType();
@@ -814,7 +873,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             callbackContext.sendPluginResult(pluginresult);
                         }
                     };
-	
+
                     PhoneAuthProvider.getInstance().verifyPhoneNumber(number, // Phone number to verify
                             timeOutDuration, // Timeout duration
                             TimeUnit.SECONDS, // Unit of timeout
@@ -827,7 +886,7 @@ public class FirebasePlugin extends CordovaPlugin {
             }
         });
     }
-	
+
     private static String getPrivateField(PhoneAuthCredential credential, Field field) {
         try {
             field.setAccessible(true);

@@ -29,6 +29,9 @@
 static NSInteger const kNotificationStackSize = 10;
 static FirebasePlugin *firebasePlugin;
 
+static NSString *FCM_SERVER_CONNECTION = @"@gcm.googleapis.com";
+static NSString *FCM_PROJECT_SENDER_ID;
+
 + (FirebasePlugin *) firebasePlugin {
     return firebasePlugin;
 }
@@ -62,6 +65,40 @@ static FirebasePlugin *firebasePlugin;
 
 - (void)getToken:(CDVInvokedUrlCommand *)command {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[FIRInstanceID instanceID] token]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) setSenderId:(CDVInvokedUrlCommand *)command
+{
+    NSString* id = [command.arguments objectAtIndex:0];
+    FCM_PROJECT_SENDER_ID = id;
+
+    NSLog(@"Sender ID set!");
+
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+-(void) upstream:(CDVInvokedUrlCommand *)command
+{
+    CDVPluginResult* pluginResult = nil;
+    if(FCM_PROJECT_SENDER_ID == nil || [FCM_PROJECT_SENDER_ID length] == 0){
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                   messageAsString:[NSString stringWithFormat:
+                                                    @"FCM Sender Id is null, please set it first using setSenderId()"]];
+    }
+    else {
+        NSString* receiver = [NSString stringWithFormat:@"%@%@", FCM_PROJECT_SENDER_ID, FCM_SERVER_CONNECTION];
+        NSDictionary* text = [command.arguments objectAtIndex:0];
+        NSString* messageId = text[@"eventId"];
+
+        NSLog(@"Notif: %@", text);
+        NSLog(@"Sending...");
+
+        [[FIRMessaging messaging] sendMessage:text to:receiver withMessageID:messageId timeToLive:900];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -268,14 +305,7 @@ static FirebasePlugin *firebasePlugin;
 - (void)logEvent:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         NSString* name = [command.arguments objectAtIndex:0];
-        NSDictionary *parameters;
-        @try {
-            NSString *description = NSLocalizedString([command argumentAtIndex:1 withDefault:@"No Message Provided"], nil);
-            parameters = @{ NSLocalizedDescriptionKey: description };
-        }
-        @catch (NSException *execption) {
-            parameters = [command argumentAtIndex:1];
-        }
+        NSDictionary* parameters = [command.arguments objectAtIndex:1];
 
         [FIRAnalytics logEventWithName:name parameters:parameters];
 

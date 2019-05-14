@@ -111,6 +111,20 @@ public class FirebasePluginMessagingService extends FirebaseMessagingService {
         }
     }
 
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
+    @Override
+    public void onMessageSent(String msgId) {
+        super.onMessageSent(msgId);
+        Log.d(TAG, "Message sent +++++++++++++++++: " + msgId);
+    }
+
+    // From https://github.com/yatharthranjan/cordova-plugin-fcm
+    @Override
+    public void onSendError(String msgId, Exception e) {
+        super.onSendError(msgId, e);
+        Log.e(TAG, "Error sending upstream message -----------------: " + e);
+    }
+
     private void sendNotification(String id, String title, String messageBody, Map<String, String> data, boolean showNotification, String sound, String lights) {
         Bundle bundle = new Bundle();
         for (String key : data.keySet()) {
