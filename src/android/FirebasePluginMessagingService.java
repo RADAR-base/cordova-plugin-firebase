@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.cordova.PluginResult;
+
 public class FirebasePluginMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FirebasePlugin";
@@ -131,13 +133,15 @@ public class FirebasePluginMessagingService extends FirebaseMessagingService {
     public void onMessageSent(String msgId) {
         super.onMessageSent(msgId);
         Log.d(TAG, "Message sent +++++++++++++++++: " + msgId);
+        FirebasePlugin.sendUpstreamCallback(msgId, PluginResult.Status.OK, "Success");
     }
 
     // From https://github.com/yatharthranjan/cordova-plugin-fcm
     @Override
     public void onSendError(String msgId, Exception e) {
         super.onSendError(msgId, e);
-        Log.e(TAG, "Error sending upstream message -----------------: " + e);
+        Log.e(TAG, "Error sending upstream message -----------------: " + e + " " + msgId);
+        FirebasePlugin.sendUpstreamCallback(msgId, PluginResult.Status.ERROR, "Error");
     }
 
     private void sendNotification(String id, String title, String messageBody, Map<String, String> data, boolean showNotification, String sound, String lights) {
