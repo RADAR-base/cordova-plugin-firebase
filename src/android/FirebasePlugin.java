@@ -69,7 +69,7 @@ public class FirebasePlugin extends CordovaPlugin {
     private static ArrayList<Bundle> notificationStack = null;
     private static CallbackContext notificationCallbackContext;
     private static CallbackContext tokenRefreshCallbackContext;
-    private static HashMap<String, CallbackContext> upstreamCallbackCache = new HashMap<String, CallbackContext>();
+    private static final HashMap<String, CallbackContext> upstreamCallbackCache = new HashMap<String, CallbackContext>();
 
     @Override
     protected void pluginInitialize() {
