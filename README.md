@@ -11,7 +11,7 @@ This plugin brings push notifications, analytics, event tracking, crash reportin
 ## Installation
 Install the plugin by adding it to your project's config.xml:
 ```
-<plugin name="cordova-plugin-firebase-with-upstream-messaging" spec="^1.0.0" />
+<plugin name="cordova-plugin-firebase-with-upstream-messaging" spec="^2.1.0" />
 ```
 or by running:
 ```
