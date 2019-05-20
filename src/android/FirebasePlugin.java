@@ -69,6 +69,7 @@ public class FirebasePlugin extends CordovaPlugin {
     private static ArrayList<Bundle> notificationStack = null;
     private static CallbackContext notificationCallbackContext;
     private static CallbackContext tokenRefreshCallbackContext;
+    private static final HashMap<String, CallbackContext> upstreamCallbackCache = new HashMap<String, CallbackContext>();
 
     @Override
     protected void pluginInitialize() {
@@ -475,18 +476,25 @@ public class FirebasePlugin extends CordovaPlugin {
 						Log.d(TAG, "Key : " + key + ", Value : " + value);
 					}
 
+                    upstreamCallbackCache.put(map.get("eventId"), callbackContext);
 					FirebaseMessaging fm = FirebaseMessaging.getInstance();
 					fm.send(new RemoteMessage.Builder(FCM_PROJECT_SENDER_ID + FCM_SERVER_CONNECTION)
 							.setMessageId(map.get("eventId"))
 							.setData(map)
 							.setTtl(900)
 							.build());
-					callbackContext.success("Successfully Sent");
 				}catch(Exception e){
 					callbackContext.error(e.getMessage());
 				}
 			}
 		});
+    }
+
+    public static void sendUpstreamCallback(String id, PluginResult.Status status, String msg){
+        PluginResult result = new PluginResult(status, msg);
+        result.setKeepCallback(true);
+        CallbackContext context = upstreamCallbackCache.get(id);
+        if(context != null && result != null) context.sendPluginResult(result);
     }
 
     private void unregister(final CallbackContext callbackContext) {
