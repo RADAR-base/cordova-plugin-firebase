@@ -2,10 +2,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mpgxvii/cordova-plugin-firebase"
+    "url": "https://github.com/RADAR-base/cordova-plugin-firebase"
   },
   "name": "cordova-plugin-firebase-with-upstream-messaging",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Cordova plugin for Google Firebase with upstream messaging",
   "cordova": {
     "id": "cordova-plugin-firebase-with-upstream-messaging",
