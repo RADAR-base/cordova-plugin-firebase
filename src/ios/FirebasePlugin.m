@@ -305,14 +305,7 @@ static NSString *FCM_PROJECT_SENDER_ID;
 - (void)logEvent:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         NSString* name = [command.arguments objectAtIndex:0];
-        NSDictionary *parameters;
-        @try {
-            NSString *description = NSLocalizedString([command argumentAtIndex:1 withDefault:@"No Message Provided"], nil);
-            parameters = @{ NSLocalizedDescriptionKey: description };
-        }
-        @catch (NSException *execption) {
-            parameters = [command argumentAtIndex:1];
-        }
+        NSDictionary* parameters = [command.arguments objectAtIndex:1];
 
         [FIRAnalytics logEventWithName:name parameters:parameters];
 
