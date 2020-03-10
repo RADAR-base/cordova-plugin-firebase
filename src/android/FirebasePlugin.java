@@ -81,6 +81,7 @@ public class FirebasePlugin extends CordovaPlugin {
                 FirebaseApp.initializeApp(context);
                 mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
                 mFirebaseAnalytics.setAnalyticsCollectionEnabled(true);
+                FirebaseMessaging.getInstance().deliveryMetricsExportToBigQueryEnabled(true);
                 if (extras != null && extras.size() > 1) {
                     if (FirebasePlugin.notificationStack == null) {
                         FirebasePlugin.notificationStack = new ArrayList<Bundle>();
