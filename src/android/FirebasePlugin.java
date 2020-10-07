@@ -656,7 +656,7 @@ public class FirebasePlugin extends CordovaPlugin {
                 try {
                     if (FCM_PROJECT_SENDER_ID != null) callbackContext.success();
                 } catch (Exception e) {
-                    Crashlytics.logException(e);
+                    logExceptionToCrashlytics(e);
                     callbackContext.error(e.getMessage());
                 }
             }
